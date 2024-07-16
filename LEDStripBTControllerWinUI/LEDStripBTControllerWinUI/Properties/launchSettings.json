@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "LEDStripBTControllerWinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "LEDStripBTControllerWinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
