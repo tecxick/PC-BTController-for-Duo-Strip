@@ -7,7 +7,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d">
 
-    <Grid Padding="20" ColumnSpacing="30">
+    <Grid ColumnSpacing="30">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
@@ -20,9 +20,14 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Background="Gray" />
-            <StackPanel Background="Gray"
-                        Grid.Row="1" />
+            <StackPanel Background="#111111"
+                        BorderBrush="#71434343" BorderThickness="2" CornerRadius="15" Padding="20"/>
+            <StackPanel Background="#111111"
+                        Grid.Row="1"
+                        BorderBrush="#71434343"
+                        BorderThickness="2"
+                        CornerRadius="15"
+                        Padding="20" />
         </Grid>
         <Grid Grid.Column="1"
               RowSpacing="30">
@@ -32,11 +37,23 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Background="Gray" />
-            <StackPanel Background="Gray"
-                        Grid.Row="1" />
-            <StackPanel Background="Gray"
-                        Grid.Row="2" />
+            <StackPanel Background="#111111"
+                        BorderBrush="#71434343"
+                        BorderThickness="2"
+                        CornerRadius="15"
+                        Padding="20" />
+            <StackPanel Background="#111111"
+                        Grid.Row="1"
+                        BorderBrush="#71434343"
+                        BorderThickness="2"
+                        CornerRadius="15"
+                        Padding="20" />
+            <StackPanel Background="#111111"
+                        Grid.Row="2"
+                        BorderBrush="#71434343"
+                        BorderThickness="2"
+                        CornerRadius="15"
+                        Padding="20" />
         </Grid>
         <Grid Grid.Column="2"
               RowSpacing="30">
@@ -46,11 +63,23 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Background="Gray" />
-            <StackPanel Background="Gray"
-                        Grid.Row="1" />
-            <StackPanel Background="Gray"
-                        Grid.Row="2" />
+            <StackPanel Background="#111111"
+                        BorderBrush="#71434343"
+                        BorderThickness="2"
+                        CornerRadius="15"
+                        Padding="20" />
+            <StackPanel Background="#111111"
+                        Grid.Row="1"
+                        BorderBrush="#71434343"
+                        BorderThickness="2"
+                        CornerRadius="15"
+                        Padding="20" />
+            <StackPanel Background="#111111"
+                        Grid.Row="2"
+                        BorderBrush="#71434343"
+                        BorderThickness="2"
+                        CornerRadius="15"
+                        Padding="20" />
         </Grid>
 
     </Grid>
