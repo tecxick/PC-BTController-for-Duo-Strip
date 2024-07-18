@@ -28,6 +28,8 @@ namespace LEDStripBTControllerWinUI
         {
             this.InitializeComponent();
             RootFrame.Navigate(typeof(Dashboard));
+            
+
         }
     }
 }
