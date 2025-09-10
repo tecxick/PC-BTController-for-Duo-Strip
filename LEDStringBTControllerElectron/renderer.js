@@ -11,6 +11,7 @@ const commandButtons = document.querySelectorAll(
   "button:not(#connectButton):not(#disconnectButton):not(#scanButton)"
 );
 const deviceListEl = document.getElementById("deviceList");
+const brightnessSlider = document.getElementById("brightnessSlider");
 
 // simple map of discovered devices { id -> { id, name, lastSeen } }
 const discovered = new Map();
@@ -164,12 +165,14 @@ function updateStatus(message, isError = false) {
 function enableCommands() {
   commandButtons.forEach((button) => (button.disabled = false));
   connectButton.disabled = true;
+   brightnessSlider.disabled = false; 
   disconnectButton.disabled = false;
 }
 
 function disableCommands() {
   commandButtons.forEach((button) => (button.disabled = true));
   connectButton.disabled = false;
+   brightnessSlider.disabled = true; 
   disconnectButton.disabled = true;
 }
 
@@ -367,6 +370,24 @@ document.getElementById("blue").addEventListener("click", () => {
   // Corrected blue command
   sendCommand([0x7e, 0x07, 0x05, 0x03, 0x00, 0x00, 0xff, 0xef]);
 });
+//brightness slider
+brightnessSlider.addEventListener("input", (event) => {
+    // The brightness command for ELK-BLEDOM is typically [0x7E, 0x04, 0x01, <BRIGHTNESS>, 0x00, 0x00, 0xEF]
+    // The brightness value is usually from 0 to 255.
+    // Convert the 0-100 slider value to a 0-255 value
+    const brightnessValue = Math.round(event.target.value * 2.55);
+    console.log("Adjusting brightness to:", brightnessValue);
+    sendCommand([0x7E, 0x04, 0x01, brightnessValue, 0x00, 0x00, 0xEF]);
+});
+// green to green + red slider
+// brightnessSlider.addEventListener("input", (event) => {
+//     // The brightness command for ELK-BLEDOM is typically [0x7E, 0x01, 0x05, 0x03, <BRIGHTNESS>, 0xEF]
+//     // The brightness value is usually from 0 to 255.
+//     // Convert the 0-100 slider value to a 0-255 value
+//     const brightnessValue = Math.round(event.target.value * 2.55);
+//     console.log("Adjusting brightness to:", brightnessValue);
+//     sendCommand([0x7E, 0x01, 0x05, 0x03, brightnessValue, 0xEF]);
+// });
 
 // when you obtain the characteristic, log its properties for debugging
 // e.g. inside connectToLed() after ledCharacteristic is set:
