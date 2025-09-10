@@ -1,39 +1,103 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>LED Controller</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
         button {
-            font-size: 18px;
-            margin: 10px;
-            padding: 15px 30px;
-            border-radius: 12px;
+            font-size: 16px;
+            margin: 6px;
+            padding: 10px 18px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
             color: white;
         }
-        #powerOn { background: green; }
-        #powerOff { background: darkred; }
-        #red { background: red; }
-        #green { background: limegreen; }
-        #blue { background: blue; }
-        #connectButton { background: royalblue; }
-        #disconnectButton { background: darkgray; }
+
+        #deviceList {
+            margin-top: 12px;
+            max-height: 220px;
+            overflow: auto;
+            text-align: left;
+            display: inline-block;
+            width: 360px;
+        }
+
+        .device-item {
+            background: #f2f2f2;
+            color: #000;
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .device-item:hover {
+            background: #e0e0e0;
+        }
+
+        #powerOn {
+            background: green;
+        }
+
+        #powerOff {
+            background: darkred;
+        }
+
+        #red {
+            background: red;
+        }
+
+        #green {
+            background: limegreen;
+        }
+
+        #blue {
+            background: blue;
+        }
+
+        #connectButton {
+            background: royalblue;
+        }
+
+        #disconnectButton {
+            background: darkgray;
+        }
+
+        #scanButton {
+            background: teal;
+        }
+
         #status {
             margin-top: 20px;
             font-weight: bold;
             color: gray;
         }
-        .success { color: green; }
-        .error { color: red; }
+
+        .success {
+            color: green
+        }
+
+        .error {
+            color: red
+        }
     </style>
 </head>
+
 <body>
     <h1>💡 LED Controller</h1>
-    <button id="connectButton">Connect</button>
-    <button id="disconnectButton">Disconnect</button>
+    <button id="connectButton">Connect (chooser)</button>
+    <button id="scanButton">Scan devices</button>
+    <button id="disconnectButton" disabled>Disconnect</button>
+    <br>
+    <div id="deviceList" aria-label="Found devices"></div>
     <br>
     <button id="powerOn" disabled>Power ON</button>
     <button id="powerOff" disabled>Power OFF</button>
@@ -46,4 +110,5 @@
 
     <script src="renderer.js"></script>
 </body>
+
 </html>
