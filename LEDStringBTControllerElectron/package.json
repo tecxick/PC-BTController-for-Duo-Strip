@@ -1,0 +1,16 @@
+{
+  "name": "ledstringbtcontrollerelectron",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "electron": "^32.1.2",
+    "node-ble": "^1.9.0"
+  }
+}

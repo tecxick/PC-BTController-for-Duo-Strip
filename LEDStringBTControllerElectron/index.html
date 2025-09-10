@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LED Controller</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        button {
+            font-size: 18px;
+            margin: 10px;
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+        #powerOn { background: green; }
+        #powerOff { background: darkred; }
+        #red { background: red; }
+        #green { background: limegreen; }
+        #blue { background: blue; }
+        #connectButton { background: royalblue; }
+        #disconnectButton { background: darkgray; }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: gray;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>💡 LED Controller</h1>
+    <button id="connectButton">Connect</button>
+    <button id="disconnectButton">Disconnect</button>
+    <br>
+    <button id="powerOn" disabled>Power ON</button>
+    <button id="powerOff" disabled>Power OFF</button>
+    <br>
+    <button id="red" disabled>Red</button>
+    <button id="green" disabled>Green</button>
+    <button id="blue" disabled>Blue</button>
+
+    <div id="status">Status: Disconnected</div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
