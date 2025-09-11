@@ -21,6 +21,15 @@
             color: white;
         }
 
+        .btn-small {
+            font-size: 12px !important;
+            padding: 6px 12px !important;
+        }
+
+        .btn-small:hover {
+            background: #6f548f;
+        }
+
         #deviceList {
             margin-top: 12px;
             max-height: 220px;
@@ -61,6 +70,10 @@
 
         #blue {
             background: blue;
+        }
+
+        #white {
+            background: white;
         }
 
         #connectButton {
@@ -105,6 +118,17 @@
     <button id="red" disabled>Red</button>
     <button id="green" disabled>Green</button>
     <button id="blue" disabled>Blue</button>
+    <br>
+    <p>Pattern:</p>
+    <button id="p1" class="btn-small" disabled>P1</button>
+    <button id="p2" class="btn-small" disabled>P2</button>
+    <button id="p3" class="btn-small" disabled>P3</button>
+    <br>
+    <div style="margin-top: 20px;">
+        <label for="colorPicker">🎨 Pick a Color:</label>
+        <input type="color" id="colorPicker" value="#ffffff" disabled>
+    </div>
+    <br>
     <div style="margin-top: 15px;">
         <label for="brightnessSlider">Brightness:</label>
         <input type="range" id="brightnessSlider" min="0" max="100" value="100" disabled>

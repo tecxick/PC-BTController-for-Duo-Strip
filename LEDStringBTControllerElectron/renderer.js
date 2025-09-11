@@ -3,6 +3,9 @@ let gattServer = null;
 let connectedDeviceId = null;
 let connectedDeviceName = null;
 
+// Track current color (default white)
+let currentColor = { r: 255, g: 255, b: 255 };
+
 const statusElement = document.getElementById("status");
 const connectButton = document.getElementById("connectButton");
 const scanButton = document.getElementById("scanButton");
@@ -12,6 +15,7 @@ const commandButtons = document.querySelectorAll(
 );
 const deviceListEl = document.getElementById("deviceList");
 const brightnessSlider = document.getElementById("brightnessSlider");
+const colorPicker = document.getElementById("colorPicker");
 
 // simple map of discovered devices { id -> { id, name, lastSeen } }
 const discovered = new Map();
@@ -165,15 +169,17 @@ function updateStatus(message, isError = false) {
 function enableCommands() {
   commandButtons.forEach((button) => (button.disabled = false));
   connectButton.disabled = true;
-   brightnessSlider.disabled = false; 
+  brightnessSlider.disabled = false;
   disconnectButton.disabled = false;
+  colorPicker.disabled = false;
 }
 
 function disableCommands() {
   commandButtons.forEach((button) => (button.disabled = true));
   connectButton.disabled = false;
-   brightnessSlider.disabled = true; 
+  brightnessSlider.disabled = true;
   disconnectButton.disabled = true;
+  colorPicker.disabled = true;
 }
 
 async function findWritableCharacteristicFromService(service) {
@@ -343,8 +349,40 @@ async function tryAutoConnect() {
   }
 }
 
+// ----------------------
+// COLOR & BRIGHTNESS LOGIC
+// ----------------------
+
+// Apply brightness scaling to given color
+function applyBrightness(r, g, b) {
+  const brightness = brightnessSlider.value / 100; // 0.0 - 1.0
+  const scaledR = Math.round(r * brightness);
+  const scaledG = Math.round(g * brightness);
+  const scaledB = Math.round(b * brightness);
+  return { r: scaledR, g: scaledG, b: scaledB };
+}
+
+// Set static color and apply current brightness
+function setStaticColor(r, g, b) {
+  currentColor = { r, g, b }; // Save chosen color
+  const { r: br, g: bg, b: bb } = applyBrightness(r, g, b);
+  sendCommand([0x7e, 0x07, 0x05, 0x03, br, bg, bb, 0xef]);
+}
+
+// Update current color with new brightness
+function updateBrightness() {
+  const { r, g, b } = currentColor;
+  const { r: br, g: bg, b: bb } = applyBrightness(r, g, b);
+  console.log("Brightness update:", br, bg, bb);
+  sendCommand([0x7e, 0x07, 0x05, 0x03, br, bg, bb, 0xef]);
+}
+
 // run auto-connect after script loads
 tryAutoConnect();
+
+// ----------------------
+// EVENT LISTENERS
+// ----------------------
 
 // after your element queries and before disabling command buttons, add listeners:
 document.getElementById("powerOn").addEventListener("click", () => {
@@ -355,39 +393,54 @@ document.getElementById("powerOff").addEventListener("click", () => {
   console.log("powerOff clicked");
   sendCommand([0x7e, 0x04, 0x04, 0x00, 0xff, 0x00, 0xef]);
 });
+
 document.getElementById("red").addEventListener("click", () => {
-  console.log("red clicked");
-  // Corrected red command
-  sendCommand([0x7e, 0x07, 0x05, 0x03, 0xff, 0x00, 0x00, 0xef]);
+  console.log("Red clicked");
+  setStaticColor(0xff, 0x00, 0x00);
 });
+
 document.getElementById("green").addEventListener("click", () => {
-  console.log("green clicked");
-  // Corrected green command
-  sendCommand([0x7e, 0x07, 0x05, 0x03, 0x00, 0xff, 0x00, 0xef]);
+  console.log("Green clicked");
+  setStaticColor(0x00, 0xff, 0x00);
 });
+
 document.getElementById("blue").addEventListener("click", () => {
-  console.log("blue clicked");
-  // Corrected blue command
-  sendCommand([0x7e, 0x07, 0x05, 0x03, 0x00, 0x00, 0xff, 0xef]);
+  console.log("Blue clicked");
+  setStaticColor(0x00, 0x00, 0xff);
 });
-//brightness slider
-brightnessSlider.addEventListener("input", (event) => {
-    // The brightness command for ELK-BLEDOM is typically [0x7E, 0x04, 0x01, <BRIGHTNESS>, 0x00, 0x00, 0xEF]
-    // The brightness value is usually from 0 to 255.
-    // Convert the 0-100 slider value to a 0-255 value
-    const brightnessValue = Math.round(event.target.value * 2.55);
-    console.log("Adjusting brightness to:", brightnessValue);
-    sendCommand([0x7E, 0x04, 0x01, brightnessValue, 0x00, 0x00, 0xEF]);
+
+// pattern buttons
+document.getElementById("p1").addEventListener("click", () => {
+  console.log("Pattern 1 clicked");
+  // 7e 00 03 8d 03 00 00 00 ef - Fade (Blue)
+  sendCommand([0x7e, 0x00, 0x03, 0x8d, 0x03, 0x00, 0x00, 0x00, 0xef]);
 });
-// green to green + red slider
-// brightnessSlider.addEventListener("input", (event) => {
-//     // The brightness command for ELK-BLEDOM is typically [0x7E, 0x01, 0x05, 0x03, <BRIGHTNESS>, 0xEF]
-//     // The brightness value is usually from 0 to 255.
-//     // Convert the 0-100 slider value to a 0-255 value
-//     const brightnessValue = Math.round(event.target.value * 2.55);
-//     console.log("Adjusting brightness to:", brightnessValue);
-//     sendCommand([0x7E, 0x01, 0x05, 0x03, brightnessValue, 0xEF]);
-// });
+document.getElementById("p2").addEventListener("click", () => {
+  console.log("Pattern 2 clicked");
+  // 7e 00 03 8e 03 00 00 00 ef - Fade (yellow)
+  sendCommand([0x7e, 0x00, 0x03, 0x8e, 0x03, 0x00, 0x00, 0x00, 0xef]);
+});
+document.getElementById("p3").addEventListener("click", () => {
+  console.log("Pattern 3 clicked");
+  // 7e 00 03 8e 03 00 00 00 ef -
+  sendCommand([0x7e, 0x00, 0x03, 0x90, 0x03, 0x00, 0x00, 0x00, 0xef]);
+});
+
+// color picker
+colorPicker.addEventListener("input", (event) => {
+  const hex = event.target.value; // e.g. "#ff00ff"
+  const r = parseInt(hex.substr(1, 2), 16);
+  const g = parseInt(hex.substr(3, 2), 16);
+  const b = parseInt(hex.substr(5, 2), 16);
+
+  console.log("Picked color:", hex, "→", r, g, b);
+  setStaticColor(r, g, b);
+});
+
+// Brightness slider
+brightnessSlider.addEventListener("input", () => {
+  updateBrightness();
+});
 
 // when you obtain the characteristic, log its properties for debugging
 // e.g. inside connectToLed() after ledCharacteristic is set:
