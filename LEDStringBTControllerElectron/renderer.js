@@ -16,6 +16,7 @@ const commandButtons = document.querySelectorAll(
 const deviceListEl = document.getElementById("deviceList");
 const brightnessSlider = document.getElementById("brightnessSlider");
 const colorPicker = document.getElementById("colorPicker");
+const patternSelect = document.getElementById("patternSelect");
 
 // simple map of discovered devices { id -> { id, name, lastSeen } }
 const discovered = new Map();
@@ -376,6 +377,10 @@ function updateBrightness() {
   console.log("Brightness update:", br, bg, bb);
   sendCommand([0x7e, 0x07, 0x05, 0x03, br, bg, bb, 0xef]);
 }
+// pattern selection
+function setPattern(code) {
+  sendCommand([0x7e, 0x00, 0x03, code, 0x03, 0x00, 0x00, 0x00, 0xef]);
+}
 
 // run auto-connect after script loads
 tryAutoConnect();
@@ -409,23 +414,6 @@ document.getElementById("blue").addEventListener("click", () => {
   setStaticColor(0x00, 0x00, 0xff);
 });
 
-// pattern buttons
-document.getElementById("p1").addEventListener("click", () => {
-  console.log("Pattern 1 clicked");
-  // 7e 00 03 8d 03 00 00 00 ef - Fade (Blue)
-  sendCommand([0x7e, 0x00, 0x03, 0x8d, 0x03, 0x00, 0x00, 0x00, 0xef]);
-});
-document.getElementById("p2").addEventListener("click", () => {
-  console.log("Pattern 2 clicked");
-  // 7e 00 03 8e 03 00 00 00 ef - Fade (yellow)
-  sendCommand([0x7e, 0x00, 0x03, 0x8e, 0x03, 0x00, 0x00, 0x00, 0xef]);
-});
-document.getElementById("p3").addEventListener("click", () => {
-  console.log("Pattern 3 clicked");
-  // 7e 00 03 8e 03 00 00 00 ef -
-  sendCommand([0x7e, 0x00, 0x03, 0x90, 0x03, 0x00, 0x00, 0x00, 0xef]);
-});
-
 // color picker
 colorPicker.addEventListener("input", (event) => {
   const hex = event.target.value; // e.g. "#ff00ff"
@@ -440,6 +428,16 @@ colorPicker.addEventListener("input", (event) => {
 // Brightness slider
 brightnessSlider.addEventListener("input", () => {
   updateBrightness();
+});
+
+// Pattern select dropdown
+patternSelect.addEventListener("change", (event) => {
+  const selectedIndex = parseInt(event.target.value, 10); // 0–15
+  const code = 0x8d + selectedIndex;
+  console.log(
+    `Pattern selected: index=${selectedIndex}, code=0x${code.toString(16)}`
+  );
+  setPattern(code);
 });
 
 // when you obtain the characteristic, log its properties for debugging
