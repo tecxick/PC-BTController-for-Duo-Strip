@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Flux Controller</title>
+    <title>AURA Flux Controller</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -309,10 +309,15 @@
                         AURA CONTROL
                     </h1>
                     <div class="flex gap-2">
-                        <button id="powerOn"
-                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">ON</button>
-                        <button id="powerOff"
-                            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">OFF</button>
+                        <button id="power-button"
+                            class="power-btn on text-white font-bold py-3 px-6 rounded-full flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                                <line x1="12" y1="2" x2="12" y2="12"></line>
+                            </svg>
+                            <span>ON</span>
+                        </button>
                     </div>
                 </div>
 

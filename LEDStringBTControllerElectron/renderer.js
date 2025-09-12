@@ -21,8 +21,11 @@ const colorPicker = document.getElementById("colorPicker");
 const patternSelect = document.getElementById("patternSelect");
 const ledPreview = document.getElementById("led-preview");
 const appCard = document.getElementById("app-card");
+const powerButton = document.getElementById("power-button");
+const powerButtonSpan = powerButton.querySelector("span");
 
 // simple map of discovered devices { id -> { id, name, lastSeen } }
+let powerOn = true;
 const discovered = new Map();
 let currentRequestId = null;
 
@@ -460,16 +463,32 @@ tryAutoConnect();
 // ----------------------
 // EVENT LISTENERS
 // ----------------------
-document.getElementById("powerOn").addEventListener("click", () => {
-  setStaticColor(currentColor.r, currentColor.g, currentColor.b);
-  updatePreview();
-  console.log("powerOn clicked");
-  sendCommand([0x7e, 0x04, 0x04, 0x01, 0xff, 0x00, 0xef]);
-});
-document.getElementById("powerOff").addEventListener("click", () => {
-  // disableCommands();
-  console.log("powerOff clicked");
-  sendCommand([0x7e, 0x04, 0x04, 0x00, 0xff, 0x00, 0xef]);
+
+// Power button logic
+powerButton.addEventListener("click", () => {
+  powerOn = !powerOn;
+
+  // Toggle the 'on' class on the power button itself
+  powerButton.classList.toggle("on", powerOn);
+  powerButtonSpan.textContent = powerOn ? "ON" : "OFF";
+
+  // Toggle the 'disabled' class on the parent app-card
+  appCard.classList.toggle("disabled", !powerOn);
+
+  // Update LED preview and animation based on power state
+  if (powerOn) {
+    updatePreview();
+    ledPreview.classList.add("pulse");
+    console.log("powerOn clicked");
+    sendCommand([0x7e, 0x04, 0x04, 0x01, 0xff, 0x00, 0xef]);
+  } else {
+    ledPreview.style.backgroundColor = "transparent";
+    ledPreview.style.boxShadow = "none";
+    ledPreview.classList.remove("pulse");
+    // disableCommands();
+    console.log("powerOff clicked");
+    sendCommand([0x7e, 0x04, 0x04, 0x00, 0xff, 0x00, 0xef]);
+  }
 });
 
 document.getElementById("red").addEventListener("click", () => {
