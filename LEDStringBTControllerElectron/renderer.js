@@ -2,6 +2,8 @@ let ledCharacteristic = null;
 let gattServer = null;
 let connectedDeviceId = null;
 let connectedDeviceName = null;
+// add a promise-based queue to serialize BLE writes and avoid concurrent GATT ops
+let writeQueue = Promise.resolve();
 
 // Track current color (default white)
 let currentColor = { r: 255, g: 255, b: 255 };
@@ -17,6 +19,8 @@ const deviceListEl = document.getElementById("deviceList");
 const brightnessSlider = document.getElementById("brightnessSlider");
 const colorPicker = document.getElementById("colorPicker");
 const patternSelect = document.getElementById("patternSelect");
+const ledPreview = document.getElementById("led-preview");
+const appCard = document.getElementById("app-card");
 
 // simple map of discovered devices { id -> { id, name, lastSeen } }
 const discovered = new Map();
@@ -30,7 +34,8 @@ connectButton.addEventListener("click", connectToLed); // original chooser flow
 scanButton.addEventListener("click", scanForDevices);
 disconnectButton.addEventListener("click", disconnectFromLed);
 
-// listen for device lists sent from main (select-bluetooth-device interception)
+// This section is for a non-browser environment like Electron.
+// We'll keep a fallback for the browser.
 if (window.ledAPI && window.ledAPI.onDeviceList) {
   window.ledAPI.onDeviceList(({ requestId, devices }) => {
     // merge incoming devices into discovered map and update UI
@@ -62,7 +67,7 @@ function appendDeviceToList(id, name, requestId) {
   // container for label and tick
   const label = document.createElement("span");
   label.className = "device-label";
-  label.textContent = `${name} ${id ? `(${id})` : ""}`;
+  label.textContent = `${name || "Unknown Device"} ${id ? `(${id})` : ""}`;
 
   const tick = document.createElement("span");
   tick.className = "device-tick";
@@ -92,12 +97,38 @@ function appendDeviceToList(id, name, requestId) {
         if (device) {
           gattServer = await device.gatt.connect();
           device.addEventListener("gattserverdisconnected", onDisconnected);
-          const service = await gattServer.getPrimaryService(
+          // Prefer the known service but search for any writable characteristic
+          ledCharacteristic = await findWritableCharacteristic(
+            gattServer,
             "0000fff0-0000-1000-8000-00805f9b34fb"
           );
-          ledCharacteristic = await service.getCharacteristic(
-            "0000fff4-0000-1000-8000-00805f9b34fb"
-          );
+          if (!ledCharacteristic) {
+            console.warn(
+              "Fallback: no writable characteristic found. Enumerating services for debugging..."
+            );
+            try {
+              const services = await gattServer.getPrimaryServices();
+              for (const s of services) {
+                console.log("Service", s.uuid);
+                const chars = await s.getCharacteristics();
+                for (const c of chars) {
+                  console.log(
+                    "  Characteristic",
+                    c.uuid,
+                    "props:",
+                    c.properties
+                  );
+                }
+              }
+            } catch (e) {
+              console.warn("Failed to enumerate services/characteristics:", e);
+            }
+            updateStatus(
+              "Fallback: no writable characteristic found. See console for details.",
+              true
+            );
+            return;
+          }
 
           // record connected device and update UI tick/name
           connectedDeviceId = device.id;
@@ -148,23 +179,36 @@ function unmarkConnectedDevice() {
 }
 
 async function scanForDevices() {
-  updateStatus("Starting scan (will show devices in list)...");
+  updateStatus("Starting scan...");
   try {
-    // This triggers platform chooser interception (main will forward list to renderer)
-    await navigator.bluetooth.requestDevice({
+    const device = await navigator.bluetooth.requestDevice({
       acceptAllDevices: true,
       optionalServices: ["0000fff0-0000-1000-8000-00805f9b34fb"],
     });
-    // requestDevice returns only after selection/cancel; we don't rely on its result here
+
+    // Clear existing list and add the new device
+    deviceListEl.innerHTML = "";
+    appendDeviceToList(device.id, device.name);
+
+    // This simulates a selection and auto-connect after a successful scan
+    // In a real app, you would wait for the user to click "Connect"
+    updateStatus(
+      `Device found: ${device.name || "Unknown Device"}. Ready to connect.`
+    );
   } catch (err) {
-    // user cancelled or error — keep UI intact
     updateStatus(`Scan failed / cancelled: ${err.message}`, true);
+    console.error("BLE error:", err);
   }
 }
 
 function updateStatus(message, isError = false) {
   statusElement.textContent = `Status: ${message}`;
-  statusElement.className = isError ? "error" : "success";
+  statusElement.classList.remove("status-success", "status-error");
+  if (isError) {
+    statusElement.classList.add("status-error");
+  } else {
+    statusElement.classList.add("status-success");
+  }
 }
 
 function enableCommands() {
@@ -173,14 +217,20 @@ function enableCommands() {
   brightnessSlider.disabled = false;
   disconnectButton.disabled = false;
   colorPicker.disabled = false;
+  appCard.classList.remove("disabled");
+  ledPreview.classList.add("pulse");
 }
 
 function disableCommands() {
-  commandButtons.forEach((button) => (button.disabled = true));
-  connectButton.disabled = false;
+  // commandButtons.forEach((button) => (button.disabled = true));
+  // connectButton.disabled = false;
   brightnessSlider.disabled = true;
-  disconnectButton.disabled = true;
+  // disconnectButton.disabled = true;
   colorPicker.disabled = true;
+  // appCard.classList.add("disabled");
+  ledPreview.classList.remove("pulse");
+  ledPreview.style.backgroundColor = "transparent";
+  ledPreview.style.boxShadow = "none";
 }
 
 async function findWritableCharacteristicFromService(service) {
@@ -289,7 +339,7 @@ async function disconnectFromLed() {
   if (gattServer && gattServer.connected) {
     gattServer.disconnect();
     updateStatus("Disconnected.");
-    disableCommands();
+    // disableCommands();
   }
 }
 
@@ -353,6 +403,26 @@ async function tryAutoConnect() {
 // ----------------------
 // COLOR & BRIGHTNESS LOGIC
 // ----------------------
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+};
+// Update the LED preview based on current color and brightness
+const updatePreview = () => {
+  const { r, g, b } = currentColor;
+  const brightness = brightnessSlider.value / 100;
+  const brightenedRgb = `rgb(${Math.round(r * brightness)}, ${Math.round(
+    g * brightness
+  )}, ${Math.round(b * brightness)})`;
+  ledPreview.style.backgroundColor = brightenedRgb;
+  ledPreview.style.boxShadow = `0 0 20px rgb(${r}, ${g}, ${b})`;
+};
 
 // Apply brightness scaling to given color
 function applyBrightness(r, g, b) {
@@ -368,6 +438,7 @@ function setStaticColor(r, g, b) {
   currentColor = { r, g, b }; // Save chosen color
   const { r: br, g: bg, b: bb } = applyBrightness(r, g, b);
   sendCommand([0x7e, 0x07, 0x05, 0x03, br, bg, bb, 0xef]);
+  updatePreview();
 }
 
 // Update current color with new brightness
@@ -376,6 +447,7 @@ function updateBrightness() {
   const { r: br, g: bg, b: bb } = applyBrightness(r, g, b);
   console.log("Brightness update:", br, bg, bb);
   sendCommand([0x7e, 0x07, 0x05, 0x03, br, bg, bb, 0xef]);
+  updatePreview();
 }
 // pattern selection
 function setPattern(code) {
@@ -388,13 +460,14 @@ tryAutoConnect();
 // ----------------------
 // EVENT LISTENERS
 // ----------------------
-
-// after your element queries and before disabling command buttons, add listeners:
 document.getElementById("powerOn").addEventListener("click", () => {
+  setStaticColor(currentColor.r, currentColor.g, currentColor.b);
+  updatePreview();
   console.log("powerOn clicked");
   sendCommand([0x7e, 0x04, 0x04, 0x01, 0xff, 0x00, 0xef]);
 });
 document.getElementById("powerOff").addEventListener("click", () => {
+  // disableCommands();
   console.log("powerOff clicked");
   sendCommand([0x7e, 0x04, 0x04, 0x00, 0xff, 0x00, 0xef]);
 });
@@ -433,7 +506,7 @@ brightnessSlider.addEventListener("input", () => {
 // Pattern select dropdown
 patternSelect.addEventListener("change", (event) => {
   const selectedIndex = parseInt(event.target.value, 10); // 0–15
-  const code = 0x8d + selectedIndex;
+  const code = 0x8a + selectedIndex;
   console.log(
     `Pattern selected: index=${selectedIndex}, code=0x${code.toString(16)}`
   );
@@ -453,7 +526,7 @@ async function sendCommand(cmdArray) {
 
   const buffer = new Uint8Array(cmdArray);
   console.log(
-    "Sending command to",
+    "Queueing command to",
     connectedDeviceName || connectedDeviceId,
     "buffer:",
     Array.from(buffer)
@@ -465,38 +538,54 @@ async function sendCommand(cmdArray) {
     ledCharacteristic.properties
   );
 
-  // Try to write using the best available method, with fallbacks.
-  try {
-    // If both are available, prefer write (with response) first for reliability
-    if (
-      ledCharacteristic.properties?.write &&
-      ledCharacteristic.properties?.writeWithoutResponse
-    ) {
-      try {
+  const writeOp = async () => {
+    // small gap between writes to reduce GATT conflicts
+    await new Promise((res) => setTimeout(res, 25));
+    try {
+      if (ledCharacteristic.properties?.write) {
         await ledCharacteristic.writeValue(buffer);
-      } catch (e) {
-        console.warn("writeValue failed, trying writeValueWithoutResponse:", e);
+      } else if (ledCharacteristic.properties?.writeWithoutResponse) {
         await ledCharacteristic.writeValueWithoutResponse(buffer);
+      } else {
+        updateStatus("Characteristic not writable (no write property).", true);
+        console.error(
+          "Characteristic properties:",
+          ledCharacteristic.properties
+        );
+        return;
       }
-    } else if (ledCharacteristic.properties?.write) {
-      await ledCharacteristic.writeValue(buffer);
-    } else if (ledCharacteristic.properties?.writeWithoutResponse) {
-      await ledCharacteristic.writeValueWithoutResponse(buffer);
-    } else {
-      updateStatus("Characteristic not writable (no write property).", true);
-      console.error("Characteristic properties:", ledCharacteristic.properties);
-      return;
+      updateStatus("Command sent!", false);
+    } catch (error) {
+      console.error("BLE write error:", error);
+      // if GATT busy, retry once after a short delay
+      const msg = error && error.message ? error.message.toLowerCase() : "";
+      if (msg.includes("gatt operation already in progress")) {
+        console.warn("GATT busy, retrying write after 120ms...");
+        await new Promise((res) => setTimeout(res, 120));
+        try {
+          if (ledCharacteristic.properties?.write) {
+            await ledCharacteristic.writeValue(buffer);
+          } else if (ledCharacteristic.properties?.writeWithoutResponse) {
+            await ledCharacteristic.writeValueWithoutResponse(buffer);
+          }
+          updateStatus("Command sent (retry)!", false);
+        } catch (err2) {
+          updateStatus(`Failed to send command: ${err2.message}`, true);
+          console.error("BLE write retry failed:", err2);
+          if (!gattServer || !gattServer.connected) onDisconnected();
+        }
+      } else {
+        updateStatus(`Failed to send command: ${error.message}`, true);
+        if (!gattServer || !gattServer.connected) onDisconnected();
+      }
     }
+  };
 
-    updateStatus("Command sent!", false);
-  } catch (error) {
-    updateStatus(`Failed to send command: ${error.message}`, true);
-    console.error(
-      "BLE write error:",
-      error,
-      "char props:",
-      ledCharacteristic?.properties
-    );
-    if (!gattServer || !gattServer.connected) onDisconnected();
+  // serialize writes
+  writeQueue = writeQueue.then(writeOp, writeOp);
+  try {
+    await writeQueue;
+  } catch (_) {
+    // errors handled inside writeOp
   }
 }

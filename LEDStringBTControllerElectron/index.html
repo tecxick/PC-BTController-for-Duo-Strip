@@ -1,155 +1,418 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>LED Controller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Flux Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0c1e;
+            color: #d1d5db;
         }
 
-        button {
-            font-size: 16px;
-            margin: 6px;
-            padding: 10px 18px;
-            border-radius: 8px;
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .app-card {
+            background-color: #15162d;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 1000px;
+            height: fit-content;
+            padding: 3rem;
+            border: 1px solid #3d3d66;
+            transition: all 0.5s ease-in-out;
+            display: flex;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .app-card {
+                flex-direction: column;
+            }
+        }
+
+        .app-card.disabled {
+            filter: grayscale(100%);
+            opacity: 0.6;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .app-card.disabled .power-btn {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        /* Custom Styles for Slider Thumb */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #00e5ff;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 8px #00e5ff;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #00e5ff;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 8px #00e5ff;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type="range"]:hover::-webkit-slider-thumb,
+        input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px #00e5ff;
+        }
+
+        /* Custom Styles for Color Picker */
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 80px;
+            height: 80px;
+            background: none;
             border: none;
             cursor: pointer;
-            color: white;
+            border-radius: 2rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.3s ease;
         }
 
-        .btn-small {
-            font-size: 12px !important;
-            padding: 6px 12px !important;
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
         }
 
-        .btn-small:hover {
-            background: #6f548f;
+        input[type="color"]::-webkit-color-swatch {
+            border-radius: 2rem;
+            border: 3px solid #00e5ff;
+            box-shadow: 0 0 15px #00e5ff;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        #deviceList {
-            margin-top: 12px;
-            max-height: 220px;
-            overflow: auto;
-            text-align: left;
-            display: inline-block;
-            width: 360px;
+        .led-preview {
+            width: 100%;
+            height: 100px;
+            border-radius: 0.75rem;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .pulse {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 25px rgba(0, 229, 255, 0.8), 0 0 35px rgba(0, 229, 255, 0.6);
+            }
+
+            100% {
+                box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+            }
+        }
+
+        #patternSelect {
+            background-color: #252541;
+            border: 1px solid #00e5ff;
+            color: #d1d5db;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23d1d5db" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25rem;
+        }
+
+        #patternSelect:hover {
+            box-shadow: 0 0 20px #00e5ff;
+            transform: translateY(-2px);
+        }
+
+        #patternSelect option {
+            background-color: #15162d;
+            color: #d1d5db;
+        }
+
+        .power-btn {
+            background-color: #ef4444;
+            box-shadow: 0 0 15px #ef4444;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .power-btn.on {
+            background-color: #10b981;
+            box-shadow: 0 0 15px #10b981;
+        }
+
+        .power-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Styles for the new Bluetooth section */
+        .bluetooth-section {
+            border-radius: 1rem;
+            padding: 2rem;
+            background-color: rgba(21, 22, 45, 0.5);
+            border: 1px solid #3d3d66;
+        }
+
+        .device-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+            min-height: 150px;
         }
 
         .device-item {
-            background: #f2f2f2;
-            color: #000;
-            padding: 8px;
-            margin: 6px 0;
-            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #252541;
+            border: 1px solid #4a4a75;
+            margin-bottom: 0.5rem;
             cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
         }
 
         .device-item:hover {
-            background: #e0e0e0;
+            background-color: #3b3b64;
+            transform: translateY(-2px);
         }
 
-        #powerOn {
-            background: green;
+        .device-item.selected {
+            border-color: #00e5ff;
+            box-shadow: 0 0 15px #00e5ff;
         }
 
-        #powerOff {
-            background: darkred;
+        .device-tick {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
-        #red {
-            background: red;
+        .loading-animation {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-top-color: #00e5ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        #green {
-            background: limegreen;
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        #blue {
-            background: blue;
+        .status-success {
+            color: #4ade80;
+            /* green-400 */
         }
 
-        #white {
-            background: white;
-        }
-
-        #connectButton {
-            background: royalblue;
-        }
-
-        #disconnectButton {
-            background: darkgray;
-        }
-
-        #scanButton {
-            background: teal;
-        }
-
-        #status {
-            margin-top: 20px;
-            font-weight: bold;
-            color: gray;
-        }
-
-        .success {
-            color: green
-        }
-
-        .error {
-            color: red
+        .status-error {
+            color: #ef4444;
+            /* red-500 */
         }
     </style>
 </head>
 
-<body>
-    <h1>💡 LED Controller</h1>
-    <button id="connectButton">Connect (chooser)</button>
-    <button id="scanButton">Scan devices</button>
-    <button id="disconnectButton" disabled>Disconnect</button>
-    <br>
-    <div id="deviceList" aria-label="Found devices"></div>
-    <br>
-    <button id="powerOn" disabled>Power ON</button>
-    <button id="powerOff" disabled>Power OFF</button>
-    <br>
-    <button id="red" disabled>Red</button>
-    <button id="green" disabled>Green</button>
-    <button id="blue" disabled>Blue</button>
-    <br>
-    <label for="patternSelect">Color Pattern:</label>
-    <select id="patternSelect">
-        <option value="0">Pattern 0 (0x8D)</option>
-        <option value="1">Pattern 1 (0x8E)</option>
-        <option value="2">Pattern 2 (0x8F)</option>
-        <option value="3">Pattern 3 (0x90)</option>
-        <option value="4">Pattern 4 (0x91)</option>
-        <option value="5">Pattern 5 (0x92)</option>
-        <option value="6">Pattern 6 (0x93)</option>
-        <option value="7">Pattern 7 (0x94)</option>
-        <option value="8">Pattern 8 (0x95)</option>
-        <option value="9">Pattern 9 (0x96)</option>
-        <option value="10">Pattern 10 (0x97)</option>
-        <option value="11">Pattern 11 (0x98)</option>
-        <option value="12">Pattern 12 (0x99)</option>
-        <option value="13">Pattern 13 (0x9A)</option>
-        <option value="14">Pattern 14 (0x9B)</option>
-        <option value="15">Pattern 15 (0x9C)</option>
-    </select>
-    <div style="margin-top: 20px;">
-        <label for="colorPicker">🎨 Pick a Color:</label>
-        <input type="color" id="colorPicker" value="#ffffff" disabled>
-    </div>
-    <br>
-    <div style="margin-top: 15px;">
-        <label for="brightnessSlider">Brightness:</label>
-        <input type="range" id="brightnessSlider" min="0" max="100" value="100" disabled>
-    </div>
+<body class="bg-gray-900 text-gray-200">
 
-    <div id="status">Status: Disconnected</div>
+    <div class="container">
+        <div class="app-card" id="app-card">
+            <!-- Left Column: Bluetooth Controls -->
+            <div class="flex-1 bluetooth-section">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 7l10 10-5 5V2l5 5-10 10" />
+                    </svg>
+                    Bluetooth Controls
+                </h2>
+                <div class="flex flex-col gap-4 mb-4">
+                    <button id="scanButton"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">
+                        Scan for Devices
+                    </button>
+                    <button id="connectButton"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
+                        disabled>
+                        Connect
+                    </button>
+                    <button id="disconnectButton"
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
+                        disabled>
+                        Disconnect
+                    </button>
+                </div>
 
+                <h3 class="text-lg font-semibold text-gray-300 mb-2">Found Devices:</h3>
+                <div id="deviceList" class="device-list rounded-lg overflow-y-auto">
+                    <p class="text-sm text-gray-500 p-4">Press 'Scan for Devices' to begin.</p>
+                </div>
+
+                <!-- Status Display -->
+                <div class="mt-4 p-3 rounded-lg bg-gray-700">
+                    <p id="status" class="font-semibold text-gray-400">Status: Not connected.</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Aura Control UI -->
+            <div class="flex-1">
+                <div class="flex justify-between items-center mb-10">
+                    <h1
+                        class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-600 font-['Orbitron']">
+                        AURA CONTROL
+                    </h1>
+                    <div class="flex gap-2">
+                        <button id="powerOn"
+                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">ON</button>
+                        <button id="powerOff"
+                            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">OFF</button>
+                    </div>
+                </div>
+
+                <!-- LED Preview Section -->
+                <div class="mb-8">
+                    <div id="led-preview" class="led-preview pulse mb-4"></div>
+                    <p class="text-center text-sm text-gray-400">Live preview of your light strip.</p>
+                </div>
+
+                <!-- Color Control Section -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path>
+                            <path d="M12 16h-.01"></path>
+                            <path d="M12 22a4 4 0 0 0 4-4"></path>
+                            <path d="M12 18a4 4 0 0 0-4 4"></path>
+                        </svg>
+                        Color Flux
+                    </h2>
+                    <div class="flex items-center justify-between">
+                        <input type="color" id="colorPicker" class="shadow-lg cursor-pointer">
+                        <div class="flex-grow ml-4 grid grid-cols-3 gap-2">
+                            <!-- Preset Colors -->
+                            <button id="red"
+                                class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Red</button>
+                            <button id="green"
+                                class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Green</button>
+                            <button id="blue"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Blue</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brightness Control Section -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        Brightness
+                    </h2>
+                    <input type="range" id="brightnessSlider" min="0" max="100" value="100"
+                        class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Pattern Control Section -->
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="21" x2="4" y2="14"></line>
+                            <line x1="4" y1="10" x2="4" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12" y2="3"></line>
+                            <line x1="20" y1="21" x2="20" y2="16"></line>
+                            <line x1="20" y1="12" x2="20" y2="3"></line>
+                            <line x1="1" y1="14" x2="7" y2="14"></line>
+                            <line x1="9" y1="8" x2="15" y2="8"></line>
+                            <line x1="17" y1="16" x2="23" y2="16"></line>
+                        </svg>
+                        Pattern Select
+                    </h2>
+                    <select id="patternSelect">
+                        <!-- Smooth -->
+                        <option value="0">Pattern 0 Smooth 7 Colors (0x8A)</option>
+                        <option value="1">Pattern 1 Smooth Red (0x8B)</option>
+                        <option value="2">Pattern 2 Smooth Green (0x8C)</option>
+                        <option value="3">Pattern 3 Smooth Blue (0x8D)</option>
+                        <option value="4">Pattern 4 Smooth Yellow (0x8E)</option>
+                        <option value="5">Pattern 5 Smooth Cyan (0x8F)</option>
+                        <option value="6">Pattern 6 Smooth Purple (0x90)</option>
+                        <option value="7">Pattern 7 Smooth White (0x91)</option>
+                        <option value="8">Pattern 8 Smooth Red-Green (0x92)</option>
+                        <option value="9">Pattern 9 Smooth Red-Blue (0x93)</option>
+                        <option value="10">Pattern 10 Smooth Green-Blue (0x94)</option>
+                        <!-- Flash -->
+                        <option value="11">Pattern 11 Flash 7 Colors (0x95)</option>
+                        <option value="12">Pattern 12 Flash Red (0x96)</option>
+                        <option value="13">Pattern 13 Flash Green (0x97)</option>
+                        <option value="14">Pattern 14 Flash Blue (0x98)</option>
+                        <option value="15">Pattern 15 Flash Yellow (0x99)</option>
+                        <option value="16">Pattern 16 Flash Cyan (0x9A)</option>
+                        <option value="17">Pattern 17 Flash Purple (0x9B)</option>
+                        <option value="18">Pattern 18 Flash White (0x9C)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="renderer.js"></script>
 </body>
 

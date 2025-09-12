@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "electron": "^32.1.2",
-    "node-ble": "^1.9.0"
+    "node-ble": "^1.9.0",
+    "node-vibrant": "^4.0.3"
   }
 }

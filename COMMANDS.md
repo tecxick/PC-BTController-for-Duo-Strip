@@ -36,6 +36,25 @@ Format: `7E ... EF`
 - Fade → `7E-04-03-27-FF-00-EF`  
 - Smooth → `7E-04-03-28-FF-00-EF`  
 
+ ```
+                        <option value="0">Pattern 0 (0x8D)</option>
+                        <option value="1">Pattern 1 (0x8E)</option>
+                        <option value="2">Pattern 2 (0x8F)</option>
+                        <option value="3">Pattern 3 (0x90)</option>
+                        <option value="4">Pattern 4 (0x91)</option>
+                        <option value="5">Pattern 5 (0x92)</option>
+                        <option value="6">Pattern 6 (0x93)</option>
+                        <option value="7">Pattern 7 (0x94)</option>
+                        <option value="8">Pattern 8 (0x95)</option>
+                        <option value="9">Pattern 9 (0x96)</option>
+                        <option value="10">Pattern 10 (0x97)</option>
+                        <option value="11">Pattern 11 (0x98)</option>
+                        <option value="12">Pattern 12 (0x99)</option>
+                        <option value="13">Pattern 13 (0x9A)</option>
+                        <option value="14">Pattern 14 (0x9B)</option>
+                        <option value="15">Pattern 15 (0x9C)</option>
+ ```
+
 ---
 
 ## 5. Speed-(for-Effects)
