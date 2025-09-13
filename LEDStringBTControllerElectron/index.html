@@ -391,29 +391,31 @@
                         </svg>
                         Pattern Select
                     </h2>
-                    <select id="patternSelect">
-                        <!-- Smooth -->
-                        <option value="0">Pattern 0 Smooth 7 Colors (0x8A)</option>
-                        <option value="1">Pattern 1 Smooth Red (0x8B)</option>
-                        <option value="2">Pattern 2 Smooth Green (0x8C)</option>
-                        <option value="3">Pattern 3 Smooth Blue (0x8D)</option>
-                        <option value="4">Pattern 4 Smooth Yellow (0x8E)</option>
-                        <option value="5">Pattern 5 Smooth Cyan (0x8F)</option>
-                        <option value="6">Pattern 6 Smooth Purple (0x90)</option>
-                        <option value="7">Pattern 7 Smooth White (0x91)</option>
-                        <option value="8">Pattern 8 Smooth Red-Green (0x92)</option>
-                        <option value="9">Pattern 9 Smooth Red-Blue (0x93)</option>
-                        <option value="10">Pattern 10 Smooth Green-Blue (0x94)</option>
-                        <!-- Flash -->
-                        <option value="11">Pattern 11 Flash 7 Colors (0x95)</option>
-                        <option value="12">Pattern 12 Flash Red (0x96)</option>
-                        <option value="13">Pattern 13 Flash Green (0x97)</option>
-                        <option value="14">Pattern 14 Flash Blue (0x98)</option>
-                        <option value="15">Pattern 15 Flash Yellow (0x99)</option>
-                        <option value="16">Pattern 16 Flash Cyan (0x9A)</option>
-                        <option value="17">Pattern 17 Flash Purple (0x9B)</option>
-                        <option value="18">Pattern 18 Flash White (0x9C)</option>
-                    </select>
+                    <div class="flex space-x-4 mb-4" id="patternTabs">
+                        <div id="smooth-tab" class="tab-button selected" data-pattern-group="smooth">
+                            <div class="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                </svg>
+                                <span class="text-sm font-semibold">Smooth</span>
+                            </div>
+                        </div>
+                        <div id="flash-tab" class="tab-button" data-pattern-group="flash">
+                            <div class="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                                <span class="text-sm font-semibold">Flash</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="pattern-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <!-- Pattern options will be dynamically inserted here -->
+                    </div>
                 </div>
             </div>
         </div>

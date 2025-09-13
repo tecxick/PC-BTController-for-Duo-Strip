@@ -24,10 +24,126 @@ const appCard = document.getElementById("app-card");
 const powerButton = document.getElementById("power-button");
 const powerButtonSpan = powerButton.querySelector("span");
 
+const smoothTab = document.getElementById("smooth-tab");
+const flashTab = document.getElementById("flash-tab");
+const patternOptionsContainer = document.getElementById("pattern-options");
+
 // simple map of discovered devices { id -> { id, name, lastSeen } }
 let powerOn = true;
 const discovered = new Map();
 let currentRequestId = null;
+let selectedDevice = null;
+let isConnected = false;
+let currentPattern = null;
+
+// Pattern data
+const patterns = {
+  smooth: [
+    { name: "Smooth 7 Colors", value: "0x8A", color: "#6366f1" },
+    { name: "Smooth Red", value: "0x8B", color: "#ef4444" },
+    { name: "Smooth Green", value: "0x8C", color: "#22c55e" },
+    { name: "Smooth Blue", value: "0x8D", color: "#3b82f6" },
+    { name: "Smooth Yellow", value: "0x8E", color: "#eab308" },
+    { name: "Smooth Cyan", value: "0x8F", color: "#06b6d4" },
+    { name: "Smooth Purple", value: "0x90", color: "#a855f7" },
+    { name: "Smooth White", value: "0x91", color: "#f8fafc" },
+    {
+      name: "Smooth R-G",
+      value: "0x92",
+      color: "linear-gradient(to right, #ef4444, #22c55e)",
+    },
+    {
+      name: "Smooth R-B",
+      value: "0x93",
+      color: "linear-gradient(to right, #ef4444, #3b82f6)",
+    },
+    {
+      name: "Smooth G-B",
+      value: "0x94",
+      color: "linear-gradient(to right, #22c55e, #3b82f6)",
+    },
+  ],
+  flash: [
+    { name: "Flash 7 Colors", value: "0x95", color: "#6366f1" },
+    { name: "Flash Red", value: "0x96", color: "#ef4444" },
+    { name: "Flash Green", value: "0x97", color: "#22c55e" },
+    { name: "Flash Blue", value: "0x98", color: "#3b82f6" },
+    { name: "Flash Yellow", value: "0x99", color: "#eab308" },
+    { name: "Flash Cyan", value: "0x9A", color: "#06b6d4" },
+    { name: "Flash Purple", value: "0x9B", color: "#a855f7" },
+    { name: "Flash White", value: "0x9C", color: "#f8fafc" },
+  ],
+};
+
+// Function to render pattern buttons
+const renderPatterns = (group) => {
+  patternOptionsContainer.innerHTML = "";
+  const patternGroup = patterns[group];
+  patternGroup.forEach((pattern) => {
+    const button = document.createElement("button");
+    button.classList.add(
+      "p-3",
+      "rounded-xl",
+      "transition-all",
+      "duration-200",
+      "font-semibold",
+      "flex",
+      "flex-col",
+      "items-center",
+      "justify-center",
+      "gap-2"
+    );
+    button.style.backgroundColor = "#252541";
+    button.style.border = "1px solid #4a4a75";
+    button.style.boxShadow = "0 0 5px rgba(0, 229, 255, 0.2)";
+    button.textContent = pattern.name;
+    button.dataset.value = pattern.value;
+
+    const colorCircle = document.createElement("div");
+    colorCircle.classList.add(
+      "w-8",
+      "h-8",
+      "rounded-full",
+      "border-2",
+      "border-gray-500"
+    );
+    if (pattern.color.startsWith("linear-gradient")) {
+      colorCircle.style.background = pattern.color;
+      colorCircle.style.borderColor = "#00e5ff";
+    } else {
+      colorCircle.style.backgroundColor = pattern.color;
+      colorCircle.style.borderColor = pattern.color;
+    }
+    button.prepend(colorCircle);
+
+    button.addEventListener("click", () => {
+      // Deselect all buttons and select the current one
+      document.querySelectorAll("#pattern-options button").forEach((btn) => {
+        btn.style.boxShadow = "0 0 5px rgba(0, 229, 255, 0.2)";
+        btn.style.border = "1px solid #4a4a75";
+      });
+      button.style.boxShadow = "0 0 15px #00e5ff";
+      button.style.border = "1px solid #00e5ff";
+      currentPattern = pattern.value;
+      console.log(`Pattern selected: ${currentPattern}`);
+
+      // Update preview based on pattern
+      if (pattern.name.includes("Smooth")) {
+        ledPreview.classList.add("pulse");
+        ledPreview.style.backgroundColor = ""; // clear background for pulse
+      } else {
+        ledPreview.classList.remove("pulse");
+        // For flash, maybe just show a solid color
+        const solidColor = pattern.color.startsWith("linear-gradient")
+          ? "#00e5ff"
+          : pattern.color;
+        ledPreview.style.backgroundColor = solidColor;
+        ledPreview.style.boxShadow = `0 0 20px ${solidColor}`;
+      }
+    });
+    patternOptionsContainer.appendChild(button);
+  });
+};
 
 // Disable command buttons initially
 commandButtons.forEach((button) => (button.disabled = true));
@@ -523,14 +639,29 @@ brightnessSlider.addEventListener("input", () => {
 });
 
 // Pattern select dropdown
-patternSelect.addEventListener("change", (event) => {
-  const selectedIndex = parseInt(event.target.value, 10); // 0–15
-  const code = 0x8a + selectedIndex;
-  console.log(
-    `Pattern selected: index=${selectedIndex}, code=0x${code.toString(16)}`
-  );
-  setPattern(code);
+// patternSelect.addEventListener("change", (event) => {
+//   const selectedIndex = parseInt(event.target.value, 10); // 0–15
+//   const code = 0x8a + selectedIndex;
+//   console.log(
+//     `Pattern selected: index=${selectedIndex}, code=0x${code.toString(16)}`
+//   );
+//   setPattern(code);
+// });
+
+// Event listeners for tabs
+smoothTab.addEventListener("click", () => {
+  smoothTab.classList.add("selected");
+  flashTab.classList.remove("selected");
+  renderPatterns("smooth");
 });
+
+flashTab.addEventListener("click", () => {
+  flashTab.classList.add("selected");
+  smoothTab.classList.remove("selected");
+  renderPatterns("flash");
+});
+// Initial render
+renderPatterns("smooth");
 
 // when you obtain the characteristic, log its properties for debugging
 // e.g. inside connectToLed() after ledCharacteristic is set:
