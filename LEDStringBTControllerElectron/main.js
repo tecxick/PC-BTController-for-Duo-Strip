@@ -4,7 +4,7 @@ const path = require("path");
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1600,
-    height: 780,
+    height: 1000,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       // enable web bluetooth support

@@ -96,7 +96,8 @@ const renderPatterns = (group) => {
     button.style.backgroundColor = "#252541";
     button.style.border = "1px solid #4a4a75";
     button.style.boxShadow = "0 0 5px rgba(0, 229, 255, 0.2)";
-    button.textContent = pattern.name;
+    button.title = pattern.name;
+    // button.textContent = pattern.name;
     button.dataset.value = pattern.value;
 
     const colorCircle = document.createElement("div");
@@ -126,6 +127,7 @@ const renderPatterns = (group) => {
       button.style.border = "1px solid #00e5ff";
       currentPattern = pattern.value;
       console.log(`Pattern selected: ${currentPattern}`);
+      setPattern(currentPattern);
 
       // Update preview based on pattern
       if (pattern.name.includes("Smooth")) {

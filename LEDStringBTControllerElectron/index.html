@@ -32,7 +32,7 @@
             border-radius: 1.5rem;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.05);
             width: 100%;
-            max-width: 1000px;
+            max-width: 1366px;
             height: fit-content;
             padding: 3rem;
             border: 1px solid #3d3d66;
@@ -41,7 +41,7 @@
             gap: 2rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1366px) {
             .app-card {
                 flex-direction: column;
             }
@@ -257,6 +257,43 @@
             color: #ef4444;
             /* red-500 */
         }
+
+        /* New styles for the tabbed interface */
+        .tab-button {
+            flex: 1 1 0%;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            transition-property: all;
+            transition-duration: 300ms;
+            background-color: #252541;
+            border: 1px solid #4a4a75;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab-button.selected {
+            border-color: #00e5ff;
+            background: linear-gradient(to bottom right, rgba(0, 229, 255, 0.2), rgba(0, 229, 255, 0));
+        }
+
+        .tab-button:hover {
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        .color-preset-circle {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 8px;
+            border: 2px solid;
+            position: relative;
+        }
+
+        .color-preset-circle:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
@@ -278,13 +315,13 @@
                         class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">
                         Scan for Devices
                     </button>
-                    <button id="connectButton"
+                    <button id="connectButton" style="display: none;"
                         class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
                         disabled>
                         Connect
                     </button>
                     <button id="disconnectButton"
-                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
+                        class="border border-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
                         disabled>
                         Disconnect
                     </button>
@@ -391,36 +428,42 @@
                         </svg>
                         Pattern Select
                     </h2>
-                    <div class="flex space-x-4 mb-4" id="patternTabs">
-                        <div id="smooth-tab" class="tab-button selected" data-pattern-group="smooth">
-                            <div class="flex flex-col items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                                </svg>
-                                <span class="text-sm font-semibold">Smooth</span>
+                    <!-- New two-column layout: left = stacked tabs, right = pattern colors -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <!-- Left column: stacked tab buttons (smooth above flash) -->
+                        <div class="flex flex-col gap-4">
+                            <div id="smooth-tab" class="tab-button selected w-full" data-pattern-group="smooth">
+                                <div class="flex flex-col items-center py-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                    </svg>
+                                    <span class="text-sm font-semibold">Smooth</span>
+                                </div>
+                            </div>
+
+                            <div id="flash-tab" class="tab-button w-full" data-pattern-group="flash">
+                                <div class="flex flex-col items-center py-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                    </svg>
+                                    <span class="text-sm font-semibold">Flash</span>
+                                </div>
                             </div>
                         </div>
-                        <div id="flash-tab" class="tab-button" data-pattern-group="flash">
-                            <div class="flex flex-col items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                                </svg>
-                                <span class="text-sm font-semibold">Flash</span>
-                            </div>
+
+                        <!-- Right column: pattern color buttons (rendered into this container by renderer.js) -->
+                        <div id="pattern-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            <!-- Pattern options will be dynamically inserted here by renderer.js -->
                         </div>
-                    </div>
-                    <div id="pattern-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        <!-- Pattern options will be dynamically inserted here -->
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script src="renderer.js"></script>
+        <script src="renderer.js"></script>
 </body>
 
 </html>
