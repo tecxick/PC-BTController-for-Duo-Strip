@@ -1,9 +1,17 @@
 body {
   font-family: "Inter", sans-serif;
-  background-color: #0b0c1e;
   color: #d1d5db;
+  app-region: drag;
 }
 
+.titlebar {
+  height: 30px;
+  background: #0b0c1e;
+  color: #d1d5db;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .container {
   display: flex;
   align-items: center;
@@ -14,10 +22,11 @@ body {
 }
 
 .app-card {
-  background-color: #15162d;
+  /* background-color: #15162d; */
+  background-color: #0b0c1eea;
   border-radius: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6),
-    inset 0 0 10px rgba(255, 255, 255, 0.05);
+  /* box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 10px rgba(255, 255, 255, 0.05); */
   width: 100%;
   max-width: 1366px;
   height: fit-content;
@@ -27,7 +36,12 @@ body {
   display: flex;
   gap: 2rem;
 }
-
+.btn-scan {
+  app-region: no-drag;
+}
+.btn-disconnect {
+  app-region: no-drag;
+}
 @media (max-width: 1366px) {
   .app-card {
     flex-direction: column;
@@ -58,6 +72,7 @@ input[type="range"]::-webkit-slider-thumb {
   border: 2px solid #fff;
   box-shadow: 0 0 8px #00e5ff;
   transition: all 0.2s ease-in-out;
+  app-region: no-drag;
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -155,12 +170,16 @@ input[type="color"]::-webkit-color-swatch {
   background-color: #15162d;
   color: #d1d5db;
 }
-
+.sec-color-control,
+.sec-pattern-select {
+  app-region: no-drag;
+}
 .power-btn {
   background-color: #ef4444;
   box-shadow: 0 0 15px #ef4444;
   transition: all 0.3s ease;
   font-family: "Orbitron", sans-serif;
+  app-region: no-drag;
 }
 
 .power-btn.on {
@@ -185,6 +204,7 @@ input[type="color"]::-webkit-color-swatch {
   padding: 0;
   margin-top: 1rem;
   min-height: 150px;
+  app-region: no-drag;
 }
 
 .device-item {
@@ -256,6 +276,7 @@ input[type="color"]::-webkit-color-swatch {
   border: 1px solid #4a4a75;
   cursor: pointer;
   position: relative;
+  app-region: no-drag;
 }
 
 .tab-button.selected {

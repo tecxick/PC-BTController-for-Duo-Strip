@@ -15,168 +15,165 @@
 
 </head>
 
-<body class="bg-gray-900 text-gray-200">
+<body>
+    <div class="app-card" id="app-card">
+        <!-- Left Column: Bluetooth Controls -->
+        <div class="flex-1 bluetooth-section">
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 7l10 10-5 5V2l5 5-10 10" />
+                </svg>
+                Bluetooth Controls
+            </h2>
+            <div class="flex flex-col gap-4 mb-4">
+                <button id="scanButton"
+                    class="btn-scan bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">
+                    Scan for Devices
+                </button>
+                <button id="connectButton" style="display: none;"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
+                    disabled>
+                    Connect
+                </button>
+                <button id="disconnectButton"
+                    class="btn-disconnect border border-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
+                    disabled>
+                    Disconnect
+                </button>
+            </div>
 
-    <div class="container">
-        <div class="app-card" id="app-card">
-            <!-- Left Column: Bluetooth Controls -->
-            <div class="flex-1 bluetooth-section">
-                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 7l10 10-5 5V2l5 5-10 10" />
-                    </svg>
-                    Bluetooth Controls
-                </h2>
-                <div class="flex flex-col gap-4 mb-4">
-                    <button id="scanButton"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">
-                        Scan for Devices
-                    </button>
-                    <button id="connectButton" style="display: none;"
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
-                        disabled>
-                        Connect
-                    </button>
-                    <button id="disconnectButton"
-                        class="border border-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200"
-                        disabled>
-                        Disconnect
-                    </button>
-                </div>
+            <h3 class="text-lg font-semibold text-gray-300 mb-2">Found Devices:</h3>
+            <div id="deviceList" class="device-list rounded-lg overflow-y-auto">
+                <p class="text-sm text-gray-500 p-4">Press 'Scan for Devices' to begin.</p>
+            </div>
 
-                <h3 class="text-lg font-semibold text-gray-300 mb-2">Found Devices:</h3>
-                <div id="deviceList" class="device-list rounded-lg overflow-y-auto">
-                    <p class="text-sm text-gray-500 p-4">Press 'Scan for Devices' to begin.</p>
-                </div>
+            <!-- Status Display -->
+            <div class="mt-4 p-3 rounded-lg bg-gray-700">
+                <p id="status" class="font-semibold text-gray-400">Status: Not connected.</p>
+            </div>
+        </div>
 
-                <!-- Status Display -->
-                <div class="mt-4 p-3 rounded-lg bg-gray-700">
-                    <p id="status" class="font-semibold text-gray-400">Status: Not connected.</p>
+        <!-- Right Column: Aura Control UI -->
+        <div class="flex-1">
+            <div class="flex justify-between items-center mb-10">
+                <h1
+                    class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-600 font-['Orbitron']">
+                    AURA FLUX Controller
+                </h1>
+                <div class="flex gap-2">
+                    <button id="power-button"
+                        class="power-btn on text-white font-bold py-3 px-6 rounded-full flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                            <line x1="12" y1="2" x2="12" y2="12"></line>
+                        </svg>
+                        <span>ON</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Right Column: Aura Control UI -->
-            <div class="flex-1">
-                <div class="flex justify-between items-center mb-10">
-                    <h1
-                        class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-600 font-['Orbitron']">
-                        AURA FLUX Controller
-                    </h1>
-                    <div class="flex gap-2">
-                        <button id="power-button"
-                            class="power-btn on text-white font-bold py-3 px-6 rounded-full flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                                <line x1="12" y1="2" x2="12" y2="12"></line>
-                            </svg>
-                            <span>ON</span>
-                        </button>
+            <!-- LED Preview Section -->
+            <div class="mb-8">
+                <div id="led-preview" class="led-preview pulse mb-4"></div>
+                <p class="text-center text-sm text-gray-400">Live preview of your light strip.</p>
+            </div>
+
+            <!-- Color Control Section -->
+            <div class="sec-color-control mb-8">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path>
+                        <path d="M12 16h-.01"></path>
+                        <path d="M12 22a4 4 0 0 0 4-4"></path>
+                        <path d="M12 18a4 4 0 0 0-4 4"></path>
+                    </svg>
+                    Color Flux
+                </h2>
+                <div class="flex items-center justify-between">
+                    <input type="color" id="colorPicker" class="shadow-lg cursor-pointer">
+                    <div class="flex-grow ml-4 grid grid-cols-3 gap-2">
+                        <!-- Preset Colors -->
+                        <button id="red"
+                            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Red</button>
+                        <button id="green"
+                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Green</button>
+                        <button id="blue"
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Blue</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- LED Preview Section -->
-                <div class="mb-8">
-                    <div id="led-preview" class="led-preview pulse mb-4"></div>
-                    <p class="text-center text-sm text-gray-400">Live preview of your light strip.</p>
-                </div>
+            <!-- Brightness Control Section -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    Brightness
+                </h2>
+                <input type="range" id="brightnessSlider" min="0" max="100" value="100"
+                    class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+            </div>
 
-                <!-- Color Control Section -->
-                <div class="mb-8">
-                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path>
-                            <path d="M12 16h-.01"></path>
-                            <path d="M12 22a4 4 0 0 0 4-4"></path>
-                            <path d="M12 18a4 4 0 0 0-4 4"></path>
-                        </svg>
-                        Color Flux
-                    </h2>
-                    <div class="flex items-center justify-between">
-                        <input type="color" id="colorPicker" class="shadow-lg cursor-pointer">
-                        <div class="flex-grow ml-4 grid grid-cols-3 gap-2">
-                            <!-- Preset Colors -->
-                            <button id="red"
-                                class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Red</button>
-                            <button id="green"
-                                class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Green</button>
-                            <button id="blue"
-                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">Blue</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Brightness Control Section -->
-                <div class="mb-8">
-                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="5"></circle>
-                            <line x1="12" y1="1" x2="12" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="23"></line>
-                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                            <line x1="1" y1="12" x2="3" y2="12"></line>
-                            <line x1="21" y1="12" x2="23" y2="12"></line>
-                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                        </svg>
-                        Brightness
-                    </h2>
-                    <input type="range" id="brightnessSlider" min="0" max="100" value="100"
-                        class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
-                </div>
-
-                <!-- Pattern Control Section -->
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="4" y1="21" x2="4" y2="14"></line>
-                            <line x1="4" y1="10" x2="4" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12" y2="3"></line>
-                            <line x1="20" y1="21" x2="20" y2="16"></line>
-                            <line x1="20" y1="12" x2="20" y2="3"></line>
-                            <line x1="1" y1="14" x2="7" y2="14"></line>
-                            <line x1="9" y1="8" x2="15" y2="8"></line>
-                            <line x1="17" y1="16" x2="23" y2="16"></line>
-                        </svg>
-                        Pattern Select
-                    </h2>
-                    <!-- New two-column layout: left = stacked tabs, right = pattern colors -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                        <!-- Left column: stacked tab buttons (smooth above flash) -->
-                        <div class="flex flex-col gap-4">
-                            <div id="smooth-tab" class="tab-button selected w-full" data-pattern-group="smooth">
-                                <div class="flex flex-col items-center py-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                                    </svg>
-                                    <span class="text-sm font-semibold">Smooth</span>
-                                </div>
-                            </div>
-
-                            <div id="flash-tab" class="tab-button w-full" data-pattern-group="flash">
-                                <div class="flex flex-col items-center py-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                                    </svg>
-                                    <span class="text-sm font-semibold">Flash</span>
-                                </div>
+            <!-- Pattern Control Section -->
+            <div class="sec-pattern-select">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-cyan-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="21" x2="4" y2="14"></line>
+                        <line x1="4" y1="10" x2="4" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12" y2="3"></line>
+                        <line x1="20" y1="21" x2="20" y2="16"></line>
+                        <line x1="20" y1="12" x2="20" y2="3"></line>
+                        <line x1="1" y1="14" x2="7" y2="14"></line>
+                        <line x1="9" y1="8" x2="15" y2="8"></line>
+                        <line x1="17" y1="16" x2="23" y2="16"></line>
+                    </svg>
+                    Pattern Select
+                </h2>
+                <!-- New two-column layout: left = stacked tabs, right = pattern colors -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                    <!-- Left column: stacked tab buttons (smooth above flash) -->
+                    <div class="flex flex-col gap-4">
+                        <div id="smooth-tab" class="tab-button selected w-full" data-pattern-group="smooth">
+                            <div class="flex flex-col items-center py-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                </svg>
+                                <span class="text-sm font-semibold">Smooth</span>
                             </div>
                         </div>
 
-                        <!-- Right column: pattern color buttons (rendered into this container by renderer.js) -->
-                        <div id="pattern-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            <!-- Pattern options will be dynamically inserted here by renderer.js -->
+                        <div id="flash-tab" class="tab-button w-full" data-pattern-group="flash">
+                            <div class="flex flex-col items-center py-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 mb-2"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                                <span class="text-sm font-semibold">Flash</span>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Right column: pattern color buttons (rendered into this container by renderer.js) -->
+                    <div id="pattern-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <!-- Pattern options will be dynamically inserted here by renderer.js -->
                     </div>
                 </div>
             </div>

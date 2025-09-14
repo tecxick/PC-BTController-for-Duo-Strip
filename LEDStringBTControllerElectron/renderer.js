@@ -634,16 +634,6 @@ brightnessSlider.addEventListener("input", () => {
   updateBrightness();
 });
 
-// Pattern select dropdown
-// patternSelect.addEventListener("change", (event) => {
-//   const selectedIndex = parseInt(event.target.value, 10); // 0–15
-//   const code = 0x8a + selectedIndex;
-//   console.log(
-//     `Pattern selected: index=${selectedIndex}, code=0x${code.toString(16)}`
-//   );
-//   setPattern(code);
-// });
-
 // Event listeners for tabs
 smoothTab.addEventListener("click", () => {
   smoothTab.classList.add("selected");
@@ -662,79 +652,6 @@ renderPatterns("smooth");
 // when you obtain the characteristic, log its properties for debugging
 // e.g. inside connectToLed() after ledCharacteristic is set:
 console.log("LED characteristic properties:", ledCharacteristic?.properties);
-
-// replace sendCommand with the version below so it picks the supported write method
-// async function sendCommand(cmdArray) {
-//   if (!ledCharacteristic) {
-//     updateStatus("Not connected. Please connect first.", true);
-//     return;
-//   }
-
-//   const buffer = new Uint8Array(cmdArray);
-//   console.log(
-//     "Queueing command to",
-//     connectedDeviceName || connectedDeviceId,
-//     "buffer:",
-//     Array.from(buffer)
-//       .map((b) => b.toString(16).padStart(2, "0"))
-//       .join(" "),
-//     "char:",
-//     ledCharacteristic.uuid,
-//     "props:",
-//     ledCharacteristic.properties
-//   );
-
-//   const writeOp = async () => {
-//     // small gap between writes to reduce GATT conflicts
-//     await new Promise((res) => setTimeout(res, 25));
-//     try {
-//       if (ledCharacteristic.properties?.write) {
-//         await ledCharacteristic.writeValue(buffer);
-//       } else if (ledCharacteristic.properties?.writeWithoutResponse) {
-//         await ledCharacteristic.writeValueWithoutResponse(buffer);
-//       } else {
-//         updateStatus("Characteristic not writable (no write property).", true);
-//         console.error(
-//           "Characteristic properties:",
-//           ledCharacteristic.properties
-//         );
-//         return;
-//       }
-//       updateStatus("Command sent!", false);
-//     } catch (error) {
-//       console.error("BLE write error:", error);
-//       // if GATT busy, retry once after a short delay
-//       const msg = error && error.message ? error.message.toLowerCase() : "";
-//       if (msg.includes("gatt operation already in progress")) {
-//         console.warn("GATT busy, retrying write after 120ms...");
-//         await new Promise((res) => setTimeout(res, 120));
-//         try {
-//           if (ledCharacteristic.properties?.write) {
-//             await ledCharacteristic.writeValue(buffer);
-//           } else if (ledCharacteristic.properties?.writeWithoutResponse) {
-//             await ledCharacteristic.writeValueWithoutResponse(buffer);
-//           }
-//           updateStatus("Command sent (retry)!", false);
-//         } catch (err2) {
-//           updateStatus(`Failed to send command: ${err2.message}`, true);
-//           console.error("BLE write retry failed:", err2);
-//           if (!gattServer || !gattServer.connected) onDisconnected();
-//         }
-//       } else {
-//         updateStatus(`Failed to send command: ${error.message}`, true);
-//         if (!gattServer || !gattServer.connected) onDisconnected();
-//       }
-//     }
-//   };
-
-//   // serialize writes
-//   writeQueue = writeQueue.then(writeOp, writeOp);
-//   try {
-//     await writeQueue;
-//   } catch (_) {
-//     // errors handled inside writeOp
-//   }
-// }
 
 async function sendCommand(cmdArray) {
   if (!ledCharacteristic) {

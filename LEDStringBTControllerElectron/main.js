@@ -3,15 +3,29 @@ const path = require("path");
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 1600,
+    width: 1375,
     height: 1000,
+    resizable: false,
+    frame: false,
+    transparent: true,
+    closable: true,
+    minimizable: true,
+    icon: path.join(__dirname, "icons", "icon.png"),
+    // titleBarStyle: "hidden",
+    // titleBarOverlay: {
+    //   color: "#0f1016ff",
+    //   symbolColor: "#1e282bff",
+    //   height: 60,
+    // },
+    // titleBarOverlay:true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       // enable web bluetooth support
       experimentalFeatures: true,
     },
+    ...(process.platform !== "darwin" ? { titleBarOverlay: true } : {}),
   });
-
+  mainWindow.wit;
   // store pending select callbacks until renderer replies
   const pendingSelectCallbacks = new Map();
 
