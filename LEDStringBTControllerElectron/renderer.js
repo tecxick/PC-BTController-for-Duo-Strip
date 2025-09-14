@@ -478,16 +478,16 @@ function onDisconnected() {
 async function tryAutoConnect() {
   const storedId = localStorage.getItem("btDeviceId");
   if (!storedId) return;
+
   updateStatus("Restoring connection...");
   try {
-    // getDevices() returns previously-granted devices without prompting
-    const devices = await navigator.bluetooth.getDevices();
-    const device = devices.find(
-      (d) => d.id === storedId || d.deviceId === storedId
-    );
+    const devices = await navigator.bluetooth.getDevices(); // only previously granted
+    console.log("Previously granted devices:", devices);
+
+    const device = devices.find((d) => d.id === storedId);
     if (!device) {
       updateStatus(
-        "Saved device not available. Use Connect/Browse to select.",
+        "Saved device not available. Use Connect to select again.",
         true
       );
       return;
@@ -501,26 +501,20 @@ async function tryAutoConnect() {
       "0000fff0-0000-1000-8000-00805f9b34fb"
     );
     if (!ledCharacteristic) {
-      updateStatus(
-        "Auto-connect: no writable characteristic found. See console.",
-        true
-      );
+      updateStatus("Auto-connect: no writable characteristic found.", true);
       return;
     }
 
-    console.log(
-      "Auto-connected using characteristic",
-      ledCharacteristic.uuid,
-      ledCharacteristic.properties
-    );
+    connectedDeviceId = device.id;
+    connectedDeviceName = device.name || device.id;
+    markConnectedDevice(connectedDeviceId);
     enableCommands();
-    updateStatus("Auto-connected to remembered device");
+    updateStatus(`Auto-connected to ${connectedDeviceName}`);
   } catch (err) {
     updateStatus(`Auto-connect failed: ${err.message}`, true);
     console.error("Auto-connect error:", err);
   }
 }
-
 // ----------------------
 // COLOR & BRIGHTNESS LOGIC
 // ----------------------
@@ -670,6 +664,78 @@ renderPatterns("smooth");
 console.log("LED characteristic properties:", ledCharacteristic?.properties);
 
 // replace sendCommand with the version below so it picks the supported write method
+// async function sendCommand(cmdArray) {
+//   if (!ledCharacteristic) {
+//     updateStatus("Not connected. Please connect first.", true);
+//     return;
+//   }
+
+//   const buffer = new Uint8Array(cmdArray);
+//   console.log(
+//     "Queueing command to",
+//     connectedDeviceName || connectedDeviceId,
+//     "buffer:",
+//     Array.from(buffer)
+//       .map((b) => b.toString(16).padStart(2, "0"))
+//       .join(" "),
+//     "char:",
+//     ledCharacteristic.uuid,
+//     "props:",
+//     ledCharacteristic.properties
+//   );
+
+//   const writeOp = async () => {
+//     // small gap between writes to reduce GATT conflicts
+//     await new Promise((res) => setTimeout(res, 25));
+//     try {
+//       if (ledCharacteristic.properties?.write) {
+//         await ledCharacteristic.writeValue(buffer);
+//       } else if (ledCharacteristic.properties?.writeWithoutResponse) {
+//         await ledCharacteristic.writeValueWithoutResponse(buffer);
+//       } else {
+//         updateStatus("Characteristic not writable (no write property).", true);
+//         console.error(
+//           "Characteristic properties:",
+//           ledCharacteristic.properties
+//         );
+//         return;
+//       }
+//       updateStatus("Command sent!", false);
+//     } catch (error) {
+//       console.error("BLE write error:", error);
+//       // if GATT busy, retry once after a short delay
+//       const msg = error && error.message ? error.message.toLowerCase() : "";
+//       if (msg.includes("gatt operation already in progress")) {
+//         console.warn("GATT busy, retrying write after 120ms...");
+//         await new Promise((res) => setTimeout(res, 120));
+//         try {
+//           if (ledCharacteristic.properties?.write) {
+//             await ledCharacteristic.writeValue(buffer);
+//           } else if (ledCharacteristic.properties?.writeWithoutResponse) {
+//             await ledCharacteristic.writeValueWithoutResponse(buffer);
+//           }
+//           updateStatus("Command sent (retry)!", false);
+//         } catch (err2) {
+//           updateStatus(`Failed to send command: ${err2.message}`, true);
+//           console.error("BLE write retry failed:", err2);
+//           if (!gattServer || !gattServer.connected) onDisconnected();
+//         }
+//       } else {
+//         updateStatus(`Failed to send command: ${error.message}`, true);
+//         if (!gattServer || !gattServer.connected) onDisconnected();
+//       }
+//     }
+//   };
+
+//   // serialize writes
+//   writeQueue = writeQueue.then(writeOp, writeOp);
+//   try {
+//     await writeQueue;
+//   } catch (_) {
+//     // errors handled inside writeOp
+//   }
+// }
+
 async function sendCommand(cmdArray) {
   if (!ledCharacteristic) {
     updateStatus("Not connected. Please connect first.", true);
@@ -677,67 +743,22 @@ async function sendCommand(cmdArray) {
   }
 
   const buffer = new Uint8Array(cmdArray);
-  console.log(
-    "Queueing command to",
-    connectedDeviceName || connectedDeviceId,
-    "buffer:",
-    Array.from(buffer)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join(" "),
-    "char:",
-    ledCharacteristic.uuid,
-    "props:",
-    ledCharacteristic.properties
-  );
 
-  const writeOp = async () => {
-    // small gap between writes to reduce GATT conflicts
-    await new Promise((res) => setTimeout(res, 25));
+  // Queue writes to avoid "Operation already in progress" errors
+  writeQueue = writeQueue.then(async () => {
     try {
-      if (ledCharacteristic.properties?.write) {
+      if (ledCharacteristic.properties.write) {
         await ledCharacteristic.writeValue(buffer);
-      } else if (ledCharacteristic.properties?.writeWithoutResponse) {
+      } else if (ledCharacteristic.properties.writeWithoutResponse) {
         await ledCharacteristic.writeValueWithoutResponse(buffer);
       } else {
-        updateStatus("Characteristic not writable (no write property).", true);
-        console.error(
-          "Characteristic properties:",
-          ledCharacteristic.properties
-        );
-        return;
+        console.error("Characteristic not writable:", ledCharacteristic.uuid);
       }
-      updateStatus("Command sent!", false);
-    } catch (error) {
-      console.error("BLE write error:", error);
-      // if GATT busy, retry once after a short delay
-      const msg = error && error.message ? error.message.toLowerCase() : "";
-      if (msg.includes("gatt operation already in progress")) {
-        console.warn("GATT busy, retrying write after 120ms...");
-        await new Promise((res) => setTimeout(res, 120));
-        try {
-          if (ledCharacteristic.properties?.write) {
-            await ledCharacteristic.writeValue(buffer);
-          } else if (ledCharacteristic.properties?.writeWithoutResponse) {
-            await ledCharacteristic.writeValueWithoutResponse(buffer);
-          }
-          updateStatus("Command sent (retry)!", false);
-        } catch (err2) {
-          updateStatus(`Failed to send command: ${err2.message}`, true);
-          console.error("BLE write retry failed:", err2);
-          if (!gattServer || !gattServer.connected) onDisconnected();
-        }
-      } else {
-        updateStatus(`Failed to send command: ${error.message}`, true);
-        if (!gattServer || !gattServer.connected) onDisconnected();
-      }
+    } catch (err) {
+      console.error("BLE write failed:", err);
+      updateStatus(`BLE write failed: ${err.message}`, true);
     }
-  };
+  });
 
-  // serialize writes
-  writeQueue = writeQueue.then(writeOp, writeOp);
-  try {
-    await writeQueue;
-  } catch (_) {
-    // errors handled inside writeOp
-  }
+  return writeQueue;
 }

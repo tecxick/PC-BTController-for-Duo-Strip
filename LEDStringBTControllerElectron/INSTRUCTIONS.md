@@ -16,3 +16,8 @@ Add "start": "electron ." to your package.json.
 npm install
 npm start
 ```
+
+## Build app
+```
+npm run build
+```
