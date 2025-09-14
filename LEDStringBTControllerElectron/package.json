@@ -1,17 +1,41 @@
 {
-  "name": "ledstringbtcontrollerelectron",
+  "name": "aurafluxcontroller",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "led, ledcontroller, bluetooth, controller, electron"
+  ],
+  "author": "lakinduk.me",
   "license": "ISC",
-  "description": "",
+  "description": " AURA FLUX Controller - PC Bluetooth LED Controller for Duo Strip",
   "dependencies": {
+    "node-ble": "^1.9.0"
+  },
+  "build": {
+    "appId": "com.lakinduk.aurafluxcontroller",
+    "productName": "Aura Flux Controller",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "devDependencies": {
     "electron": "^32.1.2",
-    "node-ble": "^1.9.0",
-    "node-vibrant": "^4.0.3"
+    "electron-builder": "^26.0.12"
   }
 }
