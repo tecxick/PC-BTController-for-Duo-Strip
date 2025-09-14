@@ -18,6 +18,7 @@
   "build": {
     "appId": "com.lakinduk.aurafluxcontroller",
     "productName": "Aura Flux Controller",
+      "icon": "icons/icon.png",
     "directories": {
       "output": "dist"
     },
