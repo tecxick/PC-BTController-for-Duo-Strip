@@ -1,0 +1,43 @@
+name: Build and Release Electron EXE
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: LEDStringBTControllerElectron
+
+      - name: Build Electron app
+        run: npm run build || echo "No build script, skipping."
+        working-directory: LEDStringBTControllerElectron
+
+      - name: Package Electron app as EXE
+        run: npx electron-builder --win --x64
+        working-directory: LEDStringBTControllerElectron
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-exe
+          path: LEDStringBTControllerElectron/dist/*.exe
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: LEDStringBTControllerElectron/dist/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

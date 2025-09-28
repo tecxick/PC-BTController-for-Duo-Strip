@@ -21,3 +21,16 @@ npm start
 ```
 npm run build
 ```
+
+
+## Release new app version
+
+To trigger a release:
+
+Commit your changes.
+Push a new tag
+
+```
+git tag v1.1.0
+git push origin v1.1.0
+```
